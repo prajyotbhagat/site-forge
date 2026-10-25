@@ -1,0 +1,120 @@
+{% extends "base.html.j2" %}
+{% from "macros.html.j2" import cta_button, lead_form, cta_band with context %}
+{% block main %}
+{% if page == 'home' %}
+<section class="hero">
+  <div class="wrap hero-inner">
+    <p class="eyebrow">{{ site.eyebrow }}</p>
+    <h1>{{ copy.hero_headline }}</h1>
+    <p class="lede">{{ copy.hero_sub }}</p>
+    <div class="hero-actions">
+      {{ cta_button(site, "btn-lg") }}
+      {% if site.has_services %}<a class="btn btn-ghost btn-lg" href="services.html">See {{ site.offer_label|lower }}</a>{% endif %}
+    </div>
+  </div>
+</section>
+{% for section in site.home_sections %}
+{% if section == 'services' and copy.services %}
+<section class="section">
+  <div class="wrap">
+    <h2>{{ site.offer_label }}</h2>
+    <ul class="cards">
+      {% for s in copy.services %}<li class="card"><h3>{{ s.name }}</h3><p>{{ s.blurb }}</p></li>{% endfor %}
+    </ul>
+  </div>
+</section>
+{% elif section == 'why' and copy.why %}
+<section class="section alt">
+  <div class="wrap">
+    <h2>Why choose {{ site.name }}</h2>
+    <ul class="ticks">{% for w in copy.why %}<li>{{ w }}</li>{% endfor %}</ul>
+  </div>
+</section>
+{% elif section == 'proof' and copy.proof %}
+<section class="section">
+  <div class="wrap">
+    <h2>Credentials &amp; reviews</h2>
+    <ul class="proof">{% for p in copy.proof %}<li><blockquote>{{ p }}</blockquote></li>{% endfor %}</ul>
+  </div>
+</section>
+{% elif section == 'area' and site.area %}
+<section class="section alt">
+  <div class="wrap area">
+    <h2>Where we work</h2>
+    <p>We serve <strong>{{ site.area }}</strong>{% if site.remote %}, and we also work with clients remotely{% endif %}.</p>
+  </div>
+</section>
+{% elif section == 'form' and site.form %}
+{{ lead_form(site) }}
+{% elif section == 'cta' %}
+{{ cta_band(site) }}
+{% endif %}
+{% endfor %}
+
+{% elif page == 'services' %}
+<section class="page-head"><div class="wrap"><h1>{{ site.offer_label }}</h1><p class="lede">{{ site.services_intro }}</p></div></section>
+<section class="section">
+  <div class="wrap">
+    <ul class="cards cards-lg">
+      {% for s in copy.services %}<li class="card"><h2>{{ s.name }}</h2><p>{{ s.blurb }}</p></li>{% endfor %}
+    </ul>
+  </div>
+</section>
+{{ cta_band(site) }}
+
+{% elif page == 'about' %}
+<section class="page-head"><div class="wrap"><h1>About {{ site.name }}</h1></div></section>
+<section class="section">
+  <div class="wrap prose">
+    <p>{{ copy.about }}</p>
+    {% if copy.why %}<h2>What we're known for</h2><ul class="ticks">{% for w in copy.why %}<li>{{ w }}</li>{% endfor %}</ul>{% endif %}
+  </div>
+</section>
+{{ cta_band(site) }}
+
+{% elif page == 'contact' %}
+<section class="page-head"><div class="wrap"><h1>Contact {{ site.name }}</h1>
+  <p class="lede">{{ site.contact_line }}</p>
+  <ul class="contact-list">
+    {% if site.phone %}<li><span>Phone</span> <a href="tel:{{ site.phone_tel }}" data-event="call_click">{{ site.phone }}</a></li>{% endif %}
+    {% if site.whatsapp %}<li><span>WhatsApp</span> <a href="https://wa.me/{{ site.phone_digits }}" rel="noopener" target="_blank" data-event="whatsapp_click">Message us on WhatsApp</a></li>{% endif %}
+    {% if site.area %}<li><span>Area</span> {{ site.area }}{% if site.remote %} · remote too{% endif %}</li>{% endif %}
+  </ul>
+</div></section>
+{% if site.form %}{{ lead_form(site) }}{% endif %}
+
+{% elif page == 'faq' %}
+<section class="page-head"><div class="wrap"><h1>Frequently asked questions</h1></div></section>
+<section class="section">
+  <div class="wrap prose faq">
+    {% for f in copy.faqs %}<details><summary>{{ f.q }}</summary><p>{{ f.a }}</p></details>{% endfor %}
+  </div>
+</section>
+{{ cta_band(site) }}
+
+{% elif page == 'privacy' %}
+<section class="page-head"><div class="wrap"><h1>Privacy notice</h1></div></section>
+<section class="section">
+  <div class="wrap prose">
+    <p>This notice explains what happens to the information you send {{ site.name }} through this website.</p>
+    <h2>What we collect</h2>
+    <p>When you use the enquiry form we receive: {{ site.form_field_labels }}. We don't use advertising cookies or third-party trackers. We count page visits and button clicks anonymously, without cookies.</p>
+    <h2>Why</h2>
+    <p>Only to reply to your enquiry and provide the service you asked about.</p>
+    <h2>How long we keep it</h2>
+    <p>Enquiries are deleted automatically after {{ site.retention_days }} days. Backups expire on a fixed schedule after that.</p>
+    <h2>Who can see it</h2>
+    <p>Only the owners and administrators of {{ site.name }}. Our website platform stores it securely on our behalf.</p>
+    <h2>Your choices</h2>
+    <p>You can ask us to see, correct or delete your details at any time{% if site.phone %} by calling {{ site.phone }}{% endif %} or by sending a message through the form.</p>
+    <p class="fineprint">This is a plain-language template. Please have it reviewed for the laws that apply where you operate.</p>
+  </div>
+</section>
+
+{% elif page == 'thanks' %}
+<section class="page-head"><div class="wrap"><h1>Thank you — we've got your message</h1>
+  <p class="lede">{{ site.name }} will get back to you soon.</p>
+  <p><a class="btn btn-ghost" href="index.html">Back to home</a></p>
+</div></section>
+{% endif %}
+{% endblock %}

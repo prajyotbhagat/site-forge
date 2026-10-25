@@ -1,0 +1,50 @@
+{% from "macros.html.j2" import cta_button with context %}<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; form-action 'self'; base-uri 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>{{ meta.title }}</title>
+<meta name="description" content="{{ meta.description }}">
+<meta property="og:title" content="{{ meta.title }}">
+<meta property="og:description" content="{{ meta.description }}">
+<meta name="sf-site" content="{{ site.slug }}">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
+{% if page == 'home' %}<script type="application/ld+json">{{ schema_json|safe }}</script>{% endif %}
+</head>
+<body class="style-{{ site.style }}">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">{% if site.logo %}<img src="{{ site.logo }}" alt="{{ site.name }} logo" height="40">{% else %}<span class="brand-text">{{ site.name }}</span>{% endif %}</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav id="site-nav" class="site-nav" aria-label="Main">
+      <ul>
+      {% for item in site.nav %}<li><a href="{{ item.href }}"{% if item.page == page %} aria-current="page"{% endif %}>{{ item.label }}</a></li>
+      {% endfor %}</ul>
+      {{ cta_button(site, "nav") }}
+    </nav>
+  </div>
+</header>
+<main id="main">
+{% block main %}{% endblock %}
+</main>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div>
+      <p class="footer-name">{{ site.name }}</p>
+      {% if site.area %}<p>Serving {{ site.area }}</p>{% endif %}
+      {% if site.phone %}<p><a href="tel:{{ site.phone_tel }}" data-event="call_click">{{ site.phone }}</a></p>{% endif %}
+    </div>
+    <ul class="footer-links">
+      {% for item in site.nav %}<li><a href="{{ item.href }}">{{ item.label }}</a></li>{% endfor %}
+      {% if site.form %}<li><a href="privacy.html">Privacy notice</a></li>{% endif %}
+    </ul>
+  </div>
+  <p class="wrap fineprint">© {{ site.name }}</p>
+</footer>
+{% if site.phone and site.sticky_call %}<a class="sticky-call btn" href="tel:{{ site.phone_tel }}" data-event="call_click">Call {{ site.phone }}</a>{% endif %}
+</body>
+</html>

@@ -1,0 +1,61 @@
+{% macro cta_button(site, extra_class="") -%}
+{%- if site.goal == 'calls' and site.phone -%}
+<a class="btn btn-primary {{ extra_class }}" href="tel:{{ site.phone_tel }}" data-event="call_click">{{ site.cta_label }}</a>
+{%- elif site.form -%}
+<a class="btn btn-primary {{ extra_class }}" href="contact.html#enquiry" data-event="cta_click">{{ site.cta_label }}</a>
+{%- elif site.phone -%}
+<a class="btn btn-primary {{ extra_class }}" href="tel:{{ site.phone_tel }}" data-event="call_click">{{ site.cta_label }}</a>
+{%- else -%}
+<a class="btn btn-primary {{ extra_class }}" href="contact.html" data-event="cta_click">{{ site.cta_label }}</a>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro lead_form(site, heading_level=2) -%}
+<section class="form-section" id="enquiry" aria-labelledby="enquiry-title">
+  <div class="wrap form-wrap">
+    <div class="form-intro">
+      <h{{ heading_level }} id="enquiry-title">{{ site.form_heading }}</h{{ heading_level }}>
+      <p>{{ site.form_intro }}</p>
+      {% if site.phone %}<p>Prefer to talk? <a href="tel:{{ site.phone_tel }}" data-event="call_click">Call {{ site.phone }}</a></p>{% endif %}
+    </div>
+    <form class="lead-form" action="{{ site.form.endpoint }}" method="post" novalidate data-lead-form>
+      {% for f in site.form.fields %}
+      <div class="field">
+        <label for="f-{{ f.key }}">{{ f.label }}{% if f.required %} <span class="req" aria-hidden="true">*</span>{% else %} <span class="opt">(optional)</span>{% endif %}</label>
+        {% if f.type == 'textarea' %}
+        <textarea id="f-{{ f.key }}" name="{{ f.key }}" rows="4" maxlength="{{ f.max }}"{% if f.required %} required{% endif %} aria-describedby="f-{{ f.key }}-hint"></textarea>
+        <p class="hint" id="f-{{ f.key }}-hint">Please don't include sensitive details such as ID or bank numbers.</p>
+        {% elif f.type == 'select' %}
+        <select id="f-{{ f.key }}" name="{{ f.key }}"{% if f.required %} required{% endif %}>
+          <option value="">Choose one</option>
+          {% for o in f.options %}<option>{{ o }}</option>{% endfor %}
+        </select>
+        {% else %}
+        <input id="f-{{ f.key }}" name="{{ f.key }}" type="{{ f.type }}" maxlength="{{ f.max }}" autocomplete="{{ f.autocomplete }}"{% if f.required %} required{% endif %}>
+        {% endif %}
+        <p class="error" id="f-{{ f.key }}-error" role="alert" hidden></p>
+      </div>
+      {% endfor %}
+      {% if site.form.contact_rule == 'email_or_phone' %}<p class="hint">Please give an email or a phone number so we can reply.</p>{% endif %}
+      <div class="hp" aria-hidden="true">
+        <label for="f-website">Leave this empty</label>
+        <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off">
+      </div>
+      <input type="hidden" name="ts" value="">
+      <p class="form-status" role="status" aria-live="polite"></p>
+      <button class="btn btn-primary" type="submit">{{ site.submit_label }}</button>
+      <p class="fineprint">We'll only use your details to reply. See our <a href="privacy.html">privacy notice</a>.</p>
+    </form>
+  </div>
+</section>
+{%- endmacro %}
+
+{% macro cta_band(site) -%}
+<section class="cta-band">
+  <div class="wrap cta-inner">
+    <h2>Ready when you are</h2>
+    <p>{{ site.contact_line }}</p>
+    {{ cta_button(site) }}
+  </div>
+</section>
+{%- endmacro %}

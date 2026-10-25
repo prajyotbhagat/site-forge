@@ -1,0 +1,81 @@
+(function () {
+  "use strict";
+  var meta = document.querySelector('meta[name="sf-site"]');
+  var slug = meta ? meta.getAttribute("content") : "";
+  var eventsUrl = "/api/public/sites/" + slug + "/events";
+
+  function track(name) {
+    try {
+      var body = JSON.stringify({ event: name });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(eventsUrl, new Blob([body], { type: "application/json" }));
+      } else {
+        fetch(eventsUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: body, keepalive: true });
+      }
+    } catch (e) { /* analytics must never break the page */ }
+  }
+
+  track("page_view");
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest ? e.target.closest("[data-event]") : null;
+    if (el) track(el.getAttribute("data-event"));
+  });
+
+  var toggle = document.querySelector(".nav-toggle");
+  var nav = document.getElementById("site-nav");
+  if (toggle && nav) {
+    toggle.addEventListener("click", function () {
+      var open = nav.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+
+  var form = document.querySelector("[data-lead-form]");
+  if (!form) return;
+  var ts = form.querySelector('input[name="ts"]');
+  if (ts) ts.value = String(Math.floor(Date.now() / 1000));
+  var status = form.querySelector(".form-status");
+
+  function showErrors(errors) {
+    form.querySelectorAll(".error").forEach(function (p) { p.hidden = true; p.textContent = ""; });
+    form.querySelectorAll("[aria-invalid]").forEach(function (el) { el.removeAttribute("aria-invalid"); });
+    var first = null;
+    Object.keys(errors || {}).forEach(function (key) {
+      var input = form.querySelector('[name="' + key + '"]');
+      var p = document.getElementById("f-" + key + "-error");
+      if (input) { input.setAttribute("aria-invalid", "true"); first = first || input; }
+      if (p) { p.textContent = errors[key]; p.hidden = false; }
+      else if (status) { status.textContent = errors[key]; }
+    });
+    if (first) first.focus();
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    status.textContent = "Sending…";
+    var data = {};
+    new FormData(form).forEach(function (v, k) { data[k] = v; });
+    fetch(form.getAttribute("action"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(data),
+      credentials: "same-origin"
+    }).then(function (r) {
+      return r.json().then(function (j) { return { ok: r.ok, status: r.status, body: j }; });
+    }).then(function (res) {
+      if (res.ok) {
+        track("form_submit");
+        window.location.href = "thanks.html";
+        return;
+      }
+      if (res.status === 422 && res.body.errors) { showErrors(res.body.errors); status.textContent = "Please check the highlighted fields."; }
+      else { status.textContent = (res.body && res.body.detail) || "Sorry, something went wrong. Please try again or call us."; }
+      btn.disabled = false;
+    }).catch(function () {
+      status.textContent = "We couldn't send your message. Please check your connection and try again.";
+      btn.disabled = false;
+    });
+  });
+})();

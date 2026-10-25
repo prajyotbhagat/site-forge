@@ -1,0 +1,194 @@
+{# ===== Section library. Every section reads only validated spec content; all text is autoescaped. ===== #}
+
+{% macro btn(cta, cls="btn-primary", size="") -%}
+{%- if cta -%}<a class="btn {{ cls }} {{ size }}" href="{{ cta.href }}" data-event="{{ cta.event or 'cta_click' }}">{% if cta.href.startswith('tel:') %}{{ icon('phone', 'ic ic-sm') }}{% endif %}<span>{{ cta.label }}</span></a>{%- endif -%}
+{%- endmacro %}
+
+{% macro hero(s) %}{% set c = s.content %}{% set v = s.variant %}
+<section class="sec hero hero-{{ v }} tone-{{ s.props.tone or 'light' }}{% if s.props.compact %} is-compact{% endif %}{% if s.props.size %} size-{{ s.props.size }}{% endif %}" id="{{ s.id }}">
+  {% if v == 'centered' and (s.props.tone or 'light') == 'dark' %}{{ mesh(theme, site.name) }}{% endif %}
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      {% if c.eyebrow %}<p class="eyebrow">{{ c.eyebrow }}</p>{% endif %}
+      <h1>{{ c.headline }}</h1>
+      {% if v == 'editorial' %}</div><div class="hero-side">{% endif %}
+      <p class="lede">{{ c.sub }}</p>
+      <div class="actions">{{ btn(c.primary_cta, "btn-primary", "btn-lg") }}{{ btn(c.secondary_cta, "btn-ghost", "btn-lg") }}</div>
+      {% if c.chips %}<ul class="chips" aria-label="Highlights">{% for ch in c.chips %}<li>{{ icon('check', 'ic ic-sm') }}{{ ch }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+    {% if v == 'split' %}<div class="hero-visual{% if s.props.hide_mobile_art %} hide-mobile{% endif %}">{{ hero_art(theme, c.art_icon, c.art_icons, site.name) }}</div>
+    {% elif v == 'banner' %}
+    <aside class="hero-card" aria-label="Contact">
+      <span class="hero-card-icon">{{ icon(c.art_icon, 'ic ic-lg') }}</span>
+      {% if site.phone %}<p class="small">Call {{ site.name }}</p><a class="hero-phone" href="tel:{{ site.phone_tel }}" data-event="call_click">{{ site.phone }}</a>{% else %}<p class="small">{{ site.name }}</p>{% endif %}
+      <ul class="hero-card-list">{% if site.area %}<li>{{ icon('pin', 'ic ic-sm') }}{{ site.area }}</li>{% endif %}{% if site.hours %}<li>{{ icon('clock', 'ic ic-sm') }}{{ site.hours }}</li>{% endif %}{% for ch in c.chips[:2] %}<li>{{ icon('check', 'ic ic-sm') }}{{ ch }}</li>{% endfor %}</ul>
+    </aside>
+    {% endif %}
+  </div>
+</section>
+{% endmacro %}
+
+{% macro trust_bar(s) %}
+<section class="sec trust trust-{{ s.variant }}" aria-label="At a glance" id="{{ s.id }}">
+  <div class="wrap"><ul class="trust-list">{% for i in s.content['items'] %}<li><span class="trust-ic">{{ icon(i.icon) }}</span><span>{{ i.text }}</span></li>{% endfor %}</ul></div>
+</section>
+{% endmacro %}
+
+{% macro services(s, level=2) %}{% set c = s.content %}{% set v = s.variant %}{% set items = c['items'][: s.props.max_items or 12] %}
+<section class="sec services services-{{ v }}" id="{{ s.id }}">
+  <div class="wrap">
+    <header class="sec-head"><h{{ level }}>{{ c.heading }}</h{{ level }}>{% if c.intro %}<p>{{ c.intro }}</p>{% endif %}</header>
+    {% if v == 'cards' or v == 'bento' %}
+    <ul class="cards cols-{{ s.props.columns or 3 }}{% if v == 'bento' %} bento n{{ items|length }}{% endif %}">
+      {% for i in items %}<li class="card"><span class="card-ic">{{ icon(i.icon) }}</span><h{{ level + 1 }}>{{ i.name }}</h{{ level + 1 }}>{% if i.text %}<p>{{ i.text }}</p>{% endif %}</li>{% endfor %}
+    </ul>
+    {% elif v == 'list' %}
+    <ul class="svc-list">{% for i in items %}<li><span class="card-ic">{{ icon(i.icon) }}</span><div><h{{ level + 1 }}>{{ i.name }}</h{{ level + 1 }}>{% if i.text %}<p>{{ i.text }}</p>{% endif %}</div></li>{% endfor %}</ul>
+    {% else %}
+    <ol class="alt-rows">{% for i in items %}<li><span class="alt-num" aria-hidden="true">{{ '%02d' % loop.index }}</span><div class="alt-panel">{{ icon(i.icon, 'ic ic-xl') }}</div><div><h{{ level + 1 }}>{{ i.name }}</h{{ level + 1 }}>{% if i.text %}<p>{{ i.text }}</p>{% endif %}</div></li>{% endfor %}</ol>
+    {% endif %}
+  </div>
+</section>
+{% endmacro %}
+
+{% macro process(s) %}{% set c = s.content %}
+<section class="sec process process-{{ s.variant }} alt" id="{{ s.id }}">
+  <div class="wrap">
+    <header class="sec-head"><h2>{{ c.heading }}</h2></header>
+    <ol class="steps n{{ c.steps|length }}">{% for st in c.steps %}<li><span class="step-n" aria-hidden="true">{{ loop.index }}</span><h3>{{ st.title }}</h3><p>{{ st.text }}</p></li>{% endfor %}</ol>
+  </div>
+</section>
+{% endmacro %}
+
+{% macro why(s) %}{% set c = s.content %}
+<section class="sec why why-{{ s.variant }}" id="{{ s.id }}">
+  <div class="wrap why-grid">
+    <header class="sec-head"><h2>{{ c.heading }}</h2></header>
+    <ul class="why-list">{% for i in c['items'] %}<li><span class="why-ic">{{ icon(i.icon) }}</span><span>{{ i.title }}</span></li>{% endfor %}</ul>
+  </div>
+</section>
+{% endmacro %}
+
+{% macro problem(s) %}{% set c = s.content %}
+<section class="sec problem" id="{{ s.id }}">
+  <div class="wrap problem-grid">
+    <div class="pcard p-problem"><p class="eyebrow">The problem</p><p class="big">{{ c.problem }}</p></div>
+    <div class="pcard p-solution"><p class="eyebrow">Our answer</p><p class="big">{{ c.solution }}</p>{% if c.points %}<ul class="ticks">{% for p in c.points %}<li>{{ icon('check', 'ic ic-sm') }}{{ p }}</li>{% endfor %}</ul>{% endif %}</div>
+  </div>
+</section>
+{% endmacro %}
+
+{% macro proof(s) %}
+<section class="sec proof alt" id="{{ s.id }}"><div class="wrap"><header class="sec-head"><h2>{{ s.content.heading }}</h2></header>
+  <ul class="quotes">{% for q in s.content['items'] %}<li>{{ icon('quote', 'ic q-ic') }}<blockquote>{{ q }}</blockquote></li>{% endfor %}</ul></div></section>
+{% endmacro %}
+
+{% macro area(s) %}{% set c = s.content %}
+<section class="sec area area-{{ s.variant }}" id="{{ s.id }}">
+  <div class="wrap area-grid">
+    <div><h2>{{ c.heading }}</h2><p class="lede">{{ c.text }}</p>
+      {% if c.places %}<ul class="places">{% for pl in c.places %}<li>{{ icon('pin', 'ic ic-sm') }}{{ pl }}</li>{% endfor %}{% if c.remote %}<li>{{ icon('globe', 'ic ic-sm') }}Online</li>{% endif %}</ul>{% endif %}</div>
+    {% if s.variant == 'map' %}<div class="area-visual">{{ map_art(theme, site.name) }}</div>{% endif %}
+  </div>
+</section>
+{% endmacro %}
+
+{% macro about(s, level=2) %}{% set c = s.content %}
+<section class="sec about about-{{ s.variant }}" id="{{ s.id }}">
+  <div class="wrap about-grid">
+    <div class="prose">{% if s.variant != 'split' %}<h{{ level }}>{{ c.heading }}</h{{ level }}>{% endif %}{% for p in c.paragraphs %}<p>{{ p }}</p>{% endfor %}</div>
+    {% if c.facts %}<dl class="facts">{% for f in c.facts %}<div><dt>{{ f.label }}</dt><dd>{{ f.value }}</dd></div>{% endfor %}</dl>{% endif %}
+  </div>
+</section>
+{% endmacro %}
+
+{% macro faq(s, level=2) %}{% set c = s.content %}
+<section class="sec faq faq-{{ s.variant }}" id="{{ s.id }}">
+  <div class="wrap faq-grid">
+    {% if level == 2 %}<header class="sec-head"><h2>{{ c.heading }}</h2>{% if page.slug == 'index' and has_faq_page %}<p><a href="faq.html">See all questions</a></p>{% endif %}</header>{% endif %}
+    <div class="faq-list">{% for f in c['items'] %}<details{% if loop.first and s.variant == 'accordion' %} open{% endif %}><summary><span>{{ f.q }}</span><span class="plus" aria-hidden="true"></span></summary><p>{{ f.a }}</p></details>{% endfor %}</div>
+  </div>
+</section>
+{% endmacro %}
+
+{% macro cta(s) %}{% set c = s.content %}
+<section class="sec cta cta-{{ s.variant }} tone-{{ s.props.tone or 'primary' }}" id="{{ s.id }}">
+  <div class="wrap cta-inner">
+    <div><h2>{{ c.heading }}</h2><p>{{ c.text }}</p></div>
+    <div class="actions">{{ btn(c.primary_cta, "btn-invert", "btn-lg") }}{% if c.phone and not c.primary_cta.href.startswith('tel:') %}<a class="cta-phone" href="tel:{{ site.phone_tel }}" data-event="call_click">{{ icon('phone', 'ic ic-sm') }}{{ c.phone }}</a>{% endif %}</div>
+  </div>
+</section>
+{% endmacro %}
+
+{% macro contact(s, heading_level=2) %}{% set c = s.content %}{% set form = site.form %}
+<section class="sec contact contact-{{ s.variant }}" id="enquiry" aria-labelledby="{{ s.id }}-h">
+  <div class="wrap contact-grid">
+    <div class="contact-copy">
+      <h{{ heading_level }} id="{{ s.id }}-h">{{ c.heading }}</h{{ heading_level }}>
+      <p class="lede">{{ c.intro }}</p>
+      {% if c.details %}<ul class="details">{% for d in c.details %}<li><span class="d-ic">{{ icon(d.icon) }}</span><span><span class="d-label">{{ d.label }}</span>{% if d.href %}<a href="{{ d.href }}" data-event="{{ 'whatsapp_click' if 'wa.me' in d.href else 'call_click' }}"{% if 'wa.me' in d.href %} rel="noopener" target="_blank"{% endif %}>{{ d.value }}</a>{% else %}{{ d.value }}{% endif %}</span></li>{% endfor %}</ul>{% endif %}
+    </div>
+    {% if form %}
+    <form class="lead-form" action="{{ form.endpoint }}" method="post" novalidate data-lead-form>
+      {% for f in form.fields %}
+      <div class="field{% if f.type == 'textarea' %} wide{% endif %}">
+        <label for="f-{{ f.key }}">{{ f.label }}{% if f.required %} <span class="req" aria-hidden="true">*</span>{% else %} <span class="opt">(optional)</span>{% endif %}</label>
+        {% if f.type == 'textarea' %}<textarea id="f-{{ f.key }}" name="{{ f.key }}" rows="4" maxlength="{{ f.max }}"{% if f.required %} required{% endif %} aria-describedby="f-{{ f.key }}-hint"></textarea><p class="hint" id="f-{{ f.key }}-hint">Please don't include sensitive details such as ID or bank numbers.</p>
+        {% elif f.type == 'select' %}<select id="f-{{ f.key }}" name="{{ f.key }}"{% if f.required %} required{% endif %}><option value="">Choose one</option>{% for o in f.options %}<option>{{ o }}</option>{% endfor %}</select>
+        {% else %}<input id="f-{{ f.key }}" name="{{ f.key }}" type="{{ f.type }}" maxlength="{{ f.max }}" autocomplete="{{ f.autocomplete }}"{% if f.required %} required{% endif %}>{% endif %}
+        <p class="error" id="f-{{ f.key }}-error" role="alert" hidden></p>
+      </div>
+      {% endfor %}
+      {% if form.contact_rule == 'email_or_phone' %}<p class="hint wide">Give an email or a phone number so we can reply.</p>{% endif %}
+      <div class="hp" aria-hidden="true"><label for="f-website">Leave this empty</label><input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+      <input type="hidden" name="ts" value="">
+      <p class="form-status wide" role="status" aria-live="polite"></p>
+      <div class="wide form-foot"><button class="btn btn-primary btn-lg" type="submit">{{ c.submit }}</button><p class="fineprint">We only use your details to reply. <a href="privacy.html">Privacy notice</a></p></div>
+    </form>
+    {% endif %}
+  </div>
+</section>
+{% endmacro %}
+
+{% macro page_head(s) %}
+<section class="sec page-head page-head-{{ s.variant }}" id="{{ s.id }}"><div class="wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">{{ page.nav_label or s.content.title }}</span></nav>
+  <h1>{{ s.content.title }}</h1>{% if s.content.sub %}<p class="lede">{{ s.content.sub }}</p>{% endif %}
+</div></section>
+{% endmacro %}
+
+{% macro prose(s) %}{% set form = site.form %}
+<section class="sec prose-sec" id="{{ s.id }}"><div class="wrap prose">
+  <p>This notice explains what happens to the information you send {{ site.name }} through this website.</p>
+  <h2>What we collect</h2><p>When you use the enquiry form we receive: {{ form.fields|map(attribute='label')|map('lower')|join(', ') }}. We don't use advertising cookies or third-party trackers; visits and button clicks are counted anonymously, without cookies.</p>
+  <h2>Why</h2><p>Only to reply to your enquiry and provide the service you asked about.</p>
+  <h2>How long we keep it</h2><p>Enquiries are deleted automatically after {{ form.retention_days }} days. Backups expire on a fixed schedule after that.</p>
+  <h2>Who can see it</h2><p>Only the owners and administrators of {{ site.name }}. Our website platform stores it securely on our behalf.</p>
+  <h2>Your choices</h2><p>You can ask us to see, correct or delete your details at any time{% if site.phone %} by calling {{ site.phone }}{% endif %} or through the enquiry form.</p>
+  <p class="fineprint">Plain-language template — please have it reviewed for the laws that apply where you operate.</p>
+</div></section>
+{% endmacro %}
+
+{% macro thanks(s) %}
+<section class="sec page-head page-head-tinted thanks-sec" id="{{ s.id }}"><div class="wrap"><span class="thanks-ic">{{ icon('check', 'ic ic-xl') }}</span>
+  <h1>{{ s.content.heading }}</h1><p class="lede">{{ s.content.text }}</p><p><a class="btn btn-ghost" href="index.html">Back to home</a></p></div></section>
+{% endmacro %}
+
+{% macro render(s, page_slug) %}
+{%- if s.type == 'hero' %}{{ hero(s) }}
+{%- elif s.type == 'trust_bar' %}{{ trust_bar(s) }}
+{%- elif s.type == 'services' %}{{ services(s, 2) }}
+{%- elif s.type == 'process' %}{{ process(s) }}
+{%- elif s.type == 'why' %}{{ why(s) }}
+{%- elif s.type == 'problem' %}{{ problem(s) }}
+{%- elif s.type == 'proof' %}{{ proof(s) }}
+{%- elif s.type == 'area' %}{{ area(s) }}
+{%- elif s.type == 'about' %}{{ about(s, 2) }}
+{%- elif s.type == 'faq' %}{{ faq(s, 2) }}
+{%- elif s.type == 'cta' %}{{ cta(s) }}
+{%- elif s.type == 'contact' %}{{ contact(s, 2) }}
+{%- elif s.type == 'page_head' %}{{ page_head(s) }}
+{%- elif s.type == 'prose' %}{{ prose(s) }}
+{%- elif s.type == 'thanks' %}{{ thanks(s) }}
+{%- endif %}
+{% endmacro %}

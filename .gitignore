@@ -1,0 +1,22 @@
+data/
+**/data/
+.secret_key
+e2e-screens/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+
+# Python virtual environments
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
